@@ -103,7 +103,7 @@ namespace СurrencyСalculator
         private double Result(bool direction)
         {
             double curr1 = Convert.ToDouble(tbInput1.Text); 
-            double coef = 0;
+            double coef = 0; 
             double rate1 = 0;
             double rate2 = 0;
 
