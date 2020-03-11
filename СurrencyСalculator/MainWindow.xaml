@@ -5,7 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:СurrencyСalculator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="500">
+        Title="MainWindow" Height="450" Width="500" FontSize="25">
+
+    <Window.Resources>
+        <Style x:Key="style">
+            <Setter Property="Control.Width" Value="200"/>
+            <Setter Property="Control.Height" Value="50"/>
+            <Setter Property="Control.VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Control.Padding" Value="10 0"/>
+        </Style>
+    </Window.Resources>
+    
     <Grid x:Name="gCurrencyData" DataContext="{Binding Path=items}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -21,31 +31,30 @@
 
         <TextBlock Grid.ColumnSpan="2"
                    x:Name="tbTitle"
-                   Text="Курс валют на "
-                   FontSize="30"/>
+                   Text="Курс валют источника от "
+                   FontSize="25"
+                   VerticalAlignment="Center"
+                   TextWrapping="WrapWithOverflow"
+                   Margin="20"/>
 
         <TextBox Grid.Row="1"
                  x:Name="tbInput1"
                  KeyUp="TbInput1_KeyUp"
-                 Width="200"
-                 Height="50"/>
+                 Style="{StaticResource style}"/>
 
         <ComboBox Grid.Row="1" Grid.Column="1"
                   x:Name="cbCurrency1"
-                  Width="200"
-                  Height="50">
+                  Style="{StaticResource style}">
         </ComboBox>
 
         <TextBox Grid.Row="2"
                  x:Name="tbInput2"
                  KeyUp="TbInput2_KeyUp"
-                 Width="200"
-                 Height="50"/>
+                 Style="{StaticResource style}"/>
 
         <ComboBox Grid.Row="2" Grid.Column="1"
                   x:Name="cbCurrency2"
-                  Width="200"
-                  Height="50">
+                  Style="{StaticResource style}">
         </ComboBox>
 
         <Button Grid.Row="3" Width="200" Height="50" FontSize="20"
@@ -53,10 +62,9 @@
                 Click="BtnUpdate_Click"/>
 
         <TextBlock Grid.Row="3" Grid.Column="1" TextAlignment="Left"
-                   Height="70" FontSize="20" Margin="20"
+                   Height="70" FontSize="18" Margin="20"
                    TextWrapping="Wrap"
-                   x:Name="tbUpdate"
-                   Text="Последнее обновление "/>
+                   x:Name="tbUpdate"/>
 
 
     </Grid>

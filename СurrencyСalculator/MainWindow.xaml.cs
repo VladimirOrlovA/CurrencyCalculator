@@ -1,19 +1,12 @@
 ﻿using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml;
-using System.Xml.Linq;
 
 namespace СurrencyСalculator
 {
@@ -23,87 +16,127 @@ namespace СurrencyСalculator
     public partial class MainWindow : Window
     {
         List<Item> items = new List<Item>();
-        double kzt = 1;
 
         public MainWindow()
         {
-            InitializeComponent();
-            gCurrencyData.DataContext = items;
-            tbTitle.Text += DateTime.Now.ToString();
-            DataLoad();
+            CultureInfo cultureInfo = new CultureInfo("ru-RU");
 
+            InitializeComponent();
+
+            gCurrencyData.DataContext = items;
+
+            if (DataLoad())
+                tbTitle.Text += items[0].pubDate.ToString("d");
+
+            cbCurrency1.SelectionChanged += comboBox_SelectionChanged;
+            cbCurrency2.SelectionChanged += comboBox_SelectionChanged;
         }
 
-        private void DataLoad()
+        private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string cbName = ((ComboBox)sender).Name;
+
+            KeyEventArgs exp = null;
+
+            if (cbName == "cbCurrency1")
+                TbInput1_KeyUp(sender, exp);
+            else
+                TbInput2_KeyUp(sender, exp);
+        }
+
+        private bool DataLoad()
         {
             XmlDocument xmlDoc = new XmlDocument();
 
             try
             {
                 xmlDoc.Load("https://nationalbank.kz/rss/rates_all.xml?switch=russian");
+                XmlElement xmlRoot = xmlDoc.DocumentElement;
+
+                int countItem = 0;
+
+                foreach (XmlNode xmlNode in xmlRoot)
+                    foreach (XmlNode xmlNodeChild in xmlNode)
+                    {
+                        if (xmlNodeChild.Name == "item")
+                        {
+                            countItem++;
+                            Item item = new Item();
+
+                            foreach (XmlNode xmlItem in xmlNodeChild)
+                            {
+                                if (xmlItem.Name == "title") item.title = xmlItem.InnerText;
+                                if (xmlItem.Name == "pubDate") item.pubDate = Convert.ToDateTime(xmlItem.InnerText);
+                                if (xmlItem.Name == "description")
+                                {
+                                    //string val = xmlItem.InnerText.Replace(".", ",");
+                                    string val = xmlItem.InnerText;
+                                    item.description = Convert.ToDouble(val);
+                                    double dval = Convert.ToDouble(val);
+                                }
+
+                            }
+                            items.Add(item);
+                        }
+                    }
+
+                List<string> currencyName = items.Select(f => f.title).ToList();
+                currencyName.Insert(0, "KZT");
+
+                cbCurrency1.ItemsSource = currencyName;
+                cbCurrency2.ItemsSource = currencyName;
+
+                cbCurrency1.SelectedIndex = 5;
+                cbCurrency2.SelectedIndex = 0;
+                return true;
             }
             catch (Exception eXml)
             {
                 tbUpdate.Foreground = Brushes.Red;
                 string errMes = eXml.ToString();
-                tbUpdate.Text = errMes.Substring(errMes.IndexOf(':') + 1); ;
-                return;
+                tbUpdate.Text = "Ресурс с данными о валюте не доступен";
+                return false;
             }
 
-            XmlElement xmlRoot = xmlDoc.DocumentElement;
-
-            int countItem = 0;
-
-            foreach (XmlNode xmlNode in xmlRoot)
-                foreach (XmlNode xmlNodeChild in xmlNode)
-                {
-                    if (xmlNodeChild.Name == "item")
-                    {
-                        countItem++;
-                        Item item = new Item();
-
-                        foreach (XmlNode xmlItem in xmlNodeChild)
-                        {
-                            if (xmlItem.Name == "title") item.title = xmlItem.InnerText;
-                            if (xmlItem.Name == "pubDate") item.pubDate = Convert.ToDateTime(xmlItem.InnerText);
-                            if (xmlItem.Name == "description") item.description =
-                                    Convert.ToDouble(xmlItem.InnerText.Replace(".", ","));
-                        }
-                        items.Add(item);
-                    }
-                }
-
-            List<string> currencyName = items.Select(f => f.title).ToList();
-            currencyName.Add("KZT");
-            cbCurrency1.ItemsSource = currencyName;
-            cbCurrency2.ItemsSource = currencyName;
-
-            cbCurrency1.SelectedIndex = 0;
-            cbCurrency2.SelectedIndex = 0;
         }
 
         private void BtnUpdate_Click(object sender, RoutedEventArgs e)
         {
+            tbUpdate.Foreground = Brushes.Black;
             items.Clear();
-            DataLoad();
+            if (DataLoad())
+            {
+                tbUpdate.Text = "последнее обновление " + DateTime.Now.ToString();
+
+                tbInput1.Text = "1";
+                KeyEventArgs exp = null;
+                TbInput1_KeyUp(sender, exp);
+            }
+            
         }
 
         private void TbInput1_KeyUp(object sender, KeyEventArgs e)
         {
-            double result = Result(false);
-            tbInput2.Text = result.ToString();
+            string userInput = tbInput1.Text;
+            double result = Result(userInput, true);
+            tbInput2.Text = "";
+            tbInput2.Text = Math.Round(result, 2).ToString();
         }
 
         private void TbInput2_KeyUp(object sender, KeyEventArgs e)
         {
-            double result = Result(true);
-            tbInput1.Text = result.ToString();
+            string userInput = tbInput2.Text;
+            double result = Result(userInput, false);
+            tbInput1.Text = "";
+            tbInput1.Text = Math.Round(result, 2).ToString();
         }
 
-        private double Result(bool direction)
+        private double Result(string userInput, bool direction)
         {
-            double curr1 = Convert.ToDouble(tbInput1.Text); 
-            double coef = 0; 
+            double currency = 0;
+            if (!string.IsNullOrEmpty(userInput) && !double.TryParse(userInput, out currency))
+                currency = 0;
+
             double rate1 = 0;
             double rate2 = 0;
 
@@ -113,36 +146,31 @@ namespace СurrencyСalculator
             rate1 = RateCurrency(currName1);
             rate2 = RateCurrency(currName2);
 
-            if (direction)
-                coef = rate2 / rate1;
-            else
-                coef = rate1 / rate2;
 
-            double result = curr1 * coef;
+            double coef = 0;
+
+            if (direction)
+                coef = rate1 / rate2;
+            else
+                coef = rate2 / rate1;
+
+            double result = currency * coef;
 
             return result;
         }
 
         private double RateCurrency(string currName)
         {
-            double rate = 0;
+            double rate = 1;
 
-            if (currName == "KZT")
+            foreach (var item in items)
             {
-                rate = 1;
-            }
-            else
-            {
-                foreach (var item in items)
+                if (currName == item.title)
                 {
-                    if (currName == item.title)
-                    {
-                        rate = item.description;
-                        break;
-                    }
+                    rate = item.description;
+                    break;
                 }
             }
-
             return rate;
         }
     }
