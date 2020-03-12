@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml;
+using System.Threading;
 
 namespace СurrencyСalculator
 {
@@ -17,16 +18,18 @@ namespace СurrencyСalculator
     {
         List<Item> items = new List<Item>();
 
+        // Получает или задает язык и региональные параметры. Используем для форматирования даты и чисел
+        CultureInfo cultureInfoEN = new CultureInfo("en-US");
+        CultureInfo cultureInfoRU = new CultureInfo("ru-RU");
+
         public MainWindow()
         {
-            CultureInfo cultureInfo = new CultureInfo("ru-RU");
-
             InitializeComponent();
 
             gCurrencyData.DataContext = items;
 
             if (DataLoad())
-                tbTitle.Text += items[0].pubDate.ToString("d");
+                tbTitle.Text += items[0].pubDate.ToString("d", cultureInfoRU);
 
             cbCurrency1.SelectionChanged += comboBox_SelectionChanged;
             cbCurrency2.SelectionChanged += comboBox_SelectionChanged;
@@ -66,13 +69,12 @@ namespace СurrencyСalculator
                             foreach (XmlNode xmlItem in xmlNodeChild)
                             {
                                 if (xmlItem.Name == "title") item.title = xmlItem.InnerText;
-                                if (xmlItem.Name == "pubDate") item.pubDate = Convert.ToDateTime(xmlItem.InnerText);
+                                if (xmlItem.Name == "pubDate") item.pubDate = Convert.ToDateTime(xmlItem.InnerText, cultureInfoRU);
                                 if (xmlItem.Name == "description")
                                 {
                                     //string val = xmlItem.InnerText.Replace(".", ",");
                                     string val = xmlItem.InnerText;
-                                    item.description = Convert.ToDouble(val);
-                                    double dval = Convert.ToDouble(val);
+                                    item.description = Convert.ToDouble(val, cultureInfoEN);
                                 }
 
                             }
@@ -112,7 +114,7 @@ namespace СurrencyСalculator
                 KeyEventArgs exp = null;
                 TbInput1_KeyUp(sender, exp);
             }
-            
+
         }
 
         private void TbInput1_KeyUp(object sender, KeyEventArgs e)
