@@ -8,8 +8,10 @@ namespace СurrencyСalculator
 {
     class Item
     {
-        public string title { get; set; }
-        public DateTime pubDate { get; set; }
-        public double description { get; set; }
+        public string Title { get; set; }
+        public DateTime PubDate { get; set; }
+        public double Description { get; set; }
+        public string Index { get; set; }
+        public string Change { get; set; }
     }
 }

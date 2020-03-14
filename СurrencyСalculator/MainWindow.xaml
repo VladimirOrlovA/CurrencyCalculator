@@ -9,15 +9,25 @@
 
     <Window.Resources>
         <Style x:Key="style">
-            <Setter Property="Control.Width" Value="200"/>
+            <Setter Property="Control.Width" Value="130"/>
             <Setter Property="Control.Height" Value="50"/>
             <Setter Property="Control.VerticalContentAlignment" Value="Center"/>
             <Setter Property="Control.Padding" Value="10 0"/>
         </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="25"/>
+            <Setter Property="TextAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="20"/>
+        </Style>
+        
     </Window.Resources>
     
-    <Grid x:Name="gCurrencyData" DataContext="{Binding Path=items}">
+    <Grid x:Name="gCurrencyData" DataContext="{Binding Path=items}" Margin="20">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
@@ -29,13 +39,9 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.ColumnSpan="2"
+        <TextBlock Grid.ColumnSpan="3"
                    x:Name="tbTitle"
-                   Text="Курс валют источника от "
-                   FontSize="25"
-                   VerticalAlignment="Center"
-                   TextWrapping="WrapWithOverflow"
-                   Margin="20"/>
+                   Text="Курс валют НБРК от "/>
 
         <TextBox Grid.Row="1"
                  x:Name="tbInput1"
@@ -47,6 +53,12 @@
                   Style="{StaticResource style}">
         </ComboBox>
 
+        <TextBlock Grid.Row="1" Grid.Column="3" Width="70"
+                   x:Name="tbkCurrency1"
+                   Text="">
+            
+        </TextBlock>
+
         <TextBox Grid.Row="2"
                  x:Name="tbInput2"
                  KeyUp="TbInput2_KeyUp"
@@ -57,13 +69,18 @@
                   Style="{StaticResource style}">
         </ComboBox>
 
-        <Button Grid.Row="3" Width="200" Height="50" FontSize="20"
-                x:Name="btnUpdate" Content="Обновить курсы"
-                Click="BtnUpdate_Click"/>
+        <TextBlock Grid.Row="2" Grid.Column="3" Width="70"
+                   x:Name="tbkCurrency2"
+                 Style="{StaticResource style}">
+        </TextBlock>
 
-        <TextBlock Grid.Row="3" Grid.Column="1" TextAlignment="Left"
-                   Height="70" FontSize="18" Margin="20"
-                   TextWrapping="Wrap"
+        <Button Grid.Row="3" FontSize="16"
+                x:Name="btnUpdate" Content="Обновить курсы"
+                Click="BtnUpdate_Click"
+                 Style="{StaticResource style}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
+                   FontSize="18"
                    x:Name="tbUpdate"/>
 
 

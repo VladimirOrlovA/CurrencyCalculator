@@ -29,7 +29,7 @@ namespace СurrencyСalculator
             gCurrencyData.DataContext = items;
 
             if (DataLoad())
-                tbTitle.Text += items[0].pubDate.ToString("d", cultureInfoRU);
+                tbTitle.Text += items[0].PubDate.ToString("d", cultureInfoRU);
 
             cbCurrency1.SelectionChanged += comboBox_SelectionChanged;
             cbCurrency2.SelectionChanged += comboBox_SelectionChanged;
@@ -56,33 +56,31 @@ namespace СurrencyСalculator
                 xmlDoc.Load("https://nationalbank.kz/rss/rates_all.xml?switch=russian");
                 XmlElement xmlRoot = xmlDoc.DocumentElement;
 
-                int countItem = 0;
-
                 foreach (XmlNode xmlNode in xmlRoot)
                     foreach (XmlNode xmlNodeChild in xmlNode)
                     {
                         if (xmlNodeChild.Name == "item")
                         {
-                            countItem++;
                             Item item = new Item();
 
                             foreach (XmlNode xmlItem in xmlNodeChild)
                             {
-                                if (xmlItem.Name == "title") item.title = xmlItem.InnerText;
-                                if (xmlItem.Name == "pubDate") item.pubDate = Convert.ToDateTime(xmlItem.InnerText, cultureInfoRU);
+                                if (xmlItem.Name == "title") item.Title = xmlItem.InnerText;
+                                if (xmlItem.Name == "pubDate") item.PubDate = Convert.ToDateTime(xmlItem.InnerText, cultureInfoRU);
                                 if (xmlItem.Name == "description")
                                 {
                                     //string val = xmlItem.InnerText.Replace(".", ",");
                                     string val = xmlItem.InnerText;
-                                    item.description = Convert.ToDouble(val, cultureInfoEN);
+                                    item.Description = Convert.ToDouble(val, cultureInfoEN);
                                 }
-
+                                if (xmlItem.Name == "index") item.Index = xmlItem.InnerText;
+                                if (xmlItem.Name == "change") item.Change = xmlItem.InnerText;
                             }
                             items.Add(item);
                         }
                     }
 
-                List<string> currencyName = items.Select(f => f.title).ToList();
+                List<string> currencyName = items.Select(f => f.Title).ToList();
                 currencyName.Insert(0, "KZT");
 
                 cbCurrency1.ItemsSource = currencyName;
@@ -90,6 +88,7 @@ namespace СurrencyСalculator
 
                 cbCurrency1.SelectedIndex = 5;
                 cbCurrency2.SelectedIndex = 0;
+
                 return true;
             }
             catch (Exception eXml)
@@ -158,6 +157,8 @@ namespace СurrencyСalculator
 
             double result = currency * coef;
 
+            CurrencyDynamic();
+
             return result;
         }
 
@@ -167,14 +168,54 @@ namespace СurrencyСalculator
 
             foreach (var item in items)
             {
-                if (currName == item.title)
+                if (currName == item.Title)
                 {
-                    rate = item.description;
+                    rate = item.Description;
                     break;
                 }
             }
             return rate;
         }
+
+        private void CurrencyDynamic()
+        {
+            DayOfWeek dayOfWeek = DateTime.Now.DayOfWeek;
+            //DayOfWeek dayOfWeek = DayOfWeek.Monday;
+            if (dayOfWeek != DayOfWeek.Saturday && dayOfWeek != DayOfWeek.Sunday)
+            {
+                tbkCurrency1 = CurrencyDynamicInfo(cbCurrency1, tbkCurrency1);
+                tbkCurrency2 = CurrencyDynamicInfo(cbCurrency2, tbkCurrency2);
+            }
+            else
+            {
+                tbUpdate.Text = "в Сб Вс нет торгов";
+                tbUpdate.Foreground = Brushes.Red;
+                tbkCurrency1.Text = tbkCurrency2.Text = " ";
+            }
+        }
+
+        private TextBlock CurrencyDynamicInfo(ComboBox comboBox , TextBlock textBlock)
+        {
+            foreach (var item in items)
+            {
+
+                if (comboBox.SelectedValue.ToString() == item.Title)
+                {
+                    //tbkCurrency1.Text = item.Change;
+                    //string str = "-1.5";
+                    string str = item.Change;
+                    if (str.Contains('-')) textBlock.Foreground = Brushes.Red;
+                    else if (str.Contains('+')) textBlock.Foreground = Brushes.Green;
+                    else textBlock.Foreground = Brushes.Black;
+                    textBlock.Text = str;
+                    return textBlock;
+                }
+            }
+            return textBlock;
+        }
+
     }
+
 }
+
 
