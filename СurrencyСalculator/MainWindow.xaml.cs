@@ -41,6 +41,8 @@ namespace СurrencyСalculator
 
             KeyEventArgs exp = null;
 
+            CurrencyDynamic();
+
             if (cbName == "cbCurrency1")
                 TbInput1_KeyUp(sender, exp);
             else
@@ -82,12 +84,20 @@ namespace СurrencyСalculator
 
                 List<string> currencyName = items.Select(f => f.Title).ToList();
                 currencyName.Insert(0, "KZT");
+                currencyName.Sort();
 
                 cbCurrency1.ItemsSource = currencyName;
                 cbCurrency2.ItemsSource = currencyName;
 
-                cbCurrency1.SelectedIndex = 5;
-                cbCurrency2.SelectedIndex = 0;
+                cbCurrency1.SelectedValue = "USD";
+                cbCurrency2.SelectedValue = "KZT";
+
+                // первый запуск - 
+                tbInput1.Text = "1";
+                object sender = null;
+                KeyEventArgs exp = null;
+                TbInput1_KeyUp(sender, exp);
+                CurrencyDynamic();
 
                 return true;
             }
@@ -157,8 +167,6 @@ namespace СurrencyСalculator
 
             double result = currency * coef;
 
-            CurrencyDynamic();
-
             return result;
         }
 
@@ -194,8 +202,15 @@ namespace СurrencyСalculator
             }
         }
 
-        private TextBlock CurrencyDynamicInfo(ComboBox comboBox , TextBlock textBlock)
+        private TextBlock CurrencyDynamicInfo(ComboBox comboBox, TextBlock textBlock)
         {
+            if (comboBox.SelectedValue.ToString() == "KZT")
+            {
+                textBlock.Text = "";
+                return textBlock;
+
+            }
+
             foreach (var item in items)
             {
 
