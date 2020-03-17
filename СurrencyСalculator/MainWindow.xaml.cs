@@ -84,7 +84,7 @@ namespace СurrencyСalculator
 
                 List<string> currencyName = items.Select(f => f.Title).ToList();
                 currencyName.Insert(0, "KZT");
-                currencyName.Sort();
+                //currencyName.Sort();
 
                 cbCurrency1.ItemsSource = currencyName;
                 cbCurrency2.ItemsSource = currencyName;
@@ -92,12 +92,7 @@ namespace СurrencyСalculator
                 cbCurrency1.SelectedValue = "USD";
                 cbCurrency2.SelectedValue = "KZT";
 
-                // первый запуск - 
-                tbInput1.Text = "1";
-                object sender = null;
-                KeyEventArgs exp = null;
-                TbInput1_KeyUp(sender, exp);
-                CurrencyDynamic();
+                firstStartResult();
 
                 return true;
             }
@@ -111,6 +106,15 @@ namespace СurrencyСalculator
 
         }
 
+        private void firstStartResult()
+        {
+            tbInput1.Text = "1";
+            object sender = null;
+            KeyEventArgs exp = null;
+            TbInput1_KeyUp(sender, exp);
+            CurrencyDynamic();
+        }
+
         private void BtnUpdate_Click(object sender, RoutedEventArgs e)
         {
             tbUpdate.Foreground = Brushes.Black;
@@ -119,9 +123,7 @@ namespace СurrencyСalculator
             {
                 tbUpdate.Text = "последнее обновление " + DateTime.Now.ToString();
 
-                tbInput1.Text = "1";
-                KeyEventArgs exp = null;
-                TbInput1_KeyUp(sender, exp);
+                firstStartResult();
             }
 
         }
@@ -216,11 +218,9 @@ namespace СurrencyСalculator
 
                 if (comboBox.SelectedValue.ToString() == item.Title)
                 {
-                    //tbkCurrency1.Text = item.Change;
-                    //string str = "-1.5";
                     string str = item.Change;
-                    if (str.Contains('-')) textBlock.Foreground = Brushes.Red;
-                    else if (str.Contains('+')) textBlock.Foreground = Brushes.Green;
+                    if (str.Contains('-')) textBlock.Foreground = Brushes.Green;
+                    else if (str.Contains('+')) textBlock.Foreground = Brushes.Red;
                     else textBlock.Foreground = Brushes.Black;
                     textBlock.Text = str;
                     return textBlock;
